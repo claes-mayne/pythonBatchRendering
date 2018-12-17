@@ -1,0 +1,30 @@
+import rhinoscriptsyntax as rs
+import octane
+import ctypes
+from ctypes import c_uint
+import Rhino as rh
+import time
+
+views = rs.NamedViews()
+print(views)
+rs.RestoreNamedView(views[0])
+time.sleep(3)
+filepath = r"C:\Batch"
+
+if views:
+    for view in views:
+        rs.RestoreNamedView(view) #select the view to render
+        octane.RestartRendering()
+        resStats = octane.ResultStatistics()
+        octane.GetResultStatistics(resStats) #not sure if this line is needed to get num of samples
+        currentSamples = resStats.samplesPerPixel
+
+        while currentSamples < 50:
+            time.sleep(.5)
+            resStats = octane.ResultStatistics()
+            octane.GetResultStatistics(resStats)
+            currentSamples = resStats.samplesPerPixel
+
+        print("Finished the " + str(view))
+        command = "OctaneSaveImage \"" + filepath + "\\" + view + ".png\""
+        rs.Command(command) #saves the image
